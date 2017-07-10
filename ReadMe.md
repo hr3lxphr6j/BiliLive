@@ -15,3 +15,4 @@
 | OUTPUT_FILE_EXT | 输出文件封装方式 |
 | OUTPUT_DIR | 输出目录 |
 | URL_SELECT | CDN选择 |
+| CYCLE | 录制结束后是否继续 |

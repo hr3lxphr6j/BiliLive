@@ -8,6 +8,6 @@ def get_current_time():
 
 
 # 加载配置
-def load_config(file="config.json"):
+def load_config(file="./config.json"):
     with open(file, 'r') as config:
         return json.load(config)

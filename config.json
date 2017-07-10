@@ -3,6 +3,7 @@
   "POLLING_INTERVAL": 60,
   "LAZY_TIME": 5,
   "OUTPUT_FILE_EXT": "flv",
-  "OUTPUT_DIR": "/home/chigusa/hgst500/LiveRecs/",
-  "URL_SELECT": 0
+  "OUTPUT_DIR": "",
+  "URL_SELECT": 0,
+  "CYCLE": 0
 }
