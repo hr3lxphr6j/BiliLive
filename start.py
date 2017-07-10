@@ -7,7 +7,7 @@ from recoder import Recoder
 config = utils.load_config()
 room_id = config['ROOM_IDS']
 app_name = 'BiliBiliLiveRec'
-version = "1.0"
+version = "1.1"
 room = LiveRoom(room_id)
 
 
@@ -25,7 +25,8 @@ def start():
             print('\r[%s] 直播间: %d 敬业了!,%ds 后开始录制' % (current_time, room_id, config['LAZY_TIME']))
             time.sleep(config['LAZY_TIME'])
             Recoder(room.get_live_urls(), room.get_room_info()['ROOMTITLE']).start_recoding()
-            break
+            if not config['CYCLE']:
+                break
         else:
             print('\r[%s] 直播间: %d 摸了' % (current_time, room_id), end='')
         time.sleep(config['POLLING_INTERVAL'])
