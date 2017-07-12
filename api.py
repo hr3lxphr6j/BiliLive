@@ -22,7 +22,7 @@ class LiveRoom(object):
         if method == 'GET':
             connection = self.session.get(url, headers=self.headers, params=params)
         if method == 'POST':
-            connection = self.session.get(url, headers=self.headers, params=params, data=data)
+            connection = self.session.post(url, headers=self.headers, params=params, data=data)
         return connection
 
     def get_room_info(self):

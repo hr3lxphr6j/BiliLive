@@ -21,17 +21,21 @@ def start():
     print('[%s]: 封装格式: %s' % (app_name, config['OUTPUT_FILE_EXT']))
     while True:
         current_time = utils.get_current_time()
-        if room.get_room_info()['_status'] == 'on':
-            print('\r[%s] 直播间: %d 敬业了!,%ds 后开始录制' % (current_time, room_id, config['LAZY_TIME']))
-            time.sleep(config['LAZY_TIME'])
-            Recoder(room.get_live_urls(), room.get_room_info()['ROOMTITLE']).start_recoding()
-            if not config['CYCLE']:
-                break
-        else:
-            print('\r[%s] 直播间: %d 摸了' % (current_time, room_id), end='')
+        try:
+            if room.get_room_info()['_status'] == 'on':
+                print('\r[%s] 直播间: %d 敬业了!,%ds 后开始录制' % (current_time, room_id, config['LAZY_TIME']))
+                time.sleep(config['LAZY_TIME'])
+                Recoder(room.get_live_urls(), room.get_room_info()['ROOMTITLE']).start_recoding()
+                if not config['CYCLE']:
+                    break
+            else:
+                print('\r[%s] 直播间: %d 摸了' % (current_time, room_id), end='')
+        except Exception:
+            print('[%s] 发生错误,10后重试!' % utils.get_current_time())
         time.sleep(config['POLLING_INTERVAL'])
-    pass
 
+
+pass
 
 if __name__ == '__main__':
     start()
