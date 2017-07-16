@@ -16,6 +16,7 @@ class LiveRoom(object):
                           'Chrome/59.0.3071.115 Safari/537.36 '
         }
         self.session = requests.session()
+        self.anchor_name = self.get_room_info()['ANCHOR_NICK_NAME']
 
     def common_request(self, method, url, params=None, data=None):
         connection = None

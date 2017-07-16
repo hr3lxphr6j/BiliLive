@@ -1,9 +1,15 @@
 {
-  "ROOM_IDS": 96136,
+  "ROOM_IDS": [
+    1030,
+    96136,
+    5096,
+    1010,
+    78347,
+    360972
+  ],
   "POLLING_INTERVAL": 60,
   "LAZY_TIME": 5,
   "OUTPUT_FILE_EXT": "flv",
-  "OUTPUT_DIR": "",
-  "URL_SELECT": 0,
-  "CYCLE": 1
+  "OUTPUT_DIR": "/Users/chigusa/",
+  "URL_SELECT": 0
 }
