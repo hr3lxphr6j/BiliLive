@@ -1,5 +1,6 @@
 # BiliLive
 垃圾一样的Bilibili直播录制工具
+
 ![image](https://github.com/hr3lxphr6j/BiliLive/raw/master/screenshot/shot.png)
 
 ## 依赖
