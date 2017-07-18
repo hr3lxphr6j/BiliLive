@@ -1,10 +1,11 @@
 import json
+import logging
 import time
 
 
 # 返回当前时间
 def get_current_time():
-    return time.strftime("%Y-%m-%d %H_%M_%S", time.localtime(time.time()))
+    return time.strftime("%Y-%m-%d %H-%M-%S", time.localtime(time.time()))
 
 
 g_config = None
@@ -16,9 +17,12 @@ def load_config(file="./config.json"):
     if g_config:
         return g_config
     else:
-        with open(file, 'r') as config:
-            g_config = json.load(config)
-        return g_config
+        try:
+            with open(file, 'r') as config:
+                g_config = json.load(config)
+            return g_config
+        except Exception:
+            logging.error('配置文件加载错误！')
 
 
 # 计时装饰器,返回函数执行时间

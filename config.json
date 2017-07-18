@@ -1,8 +1,8 @@
 {
   "ROOM_IDS": [
-    910819
+    1029
   ],
-  "POLLING_INTERVAL": 60,
+  "POLLING_INTERVAL": 30,
   "LAZY_TIME": 5,
   "OUTPUT_FILE_EXT": "flv",
   "OUTPUT_DIR": "/Users/chigusa/",

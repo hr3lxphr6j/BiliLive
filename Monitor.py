@@ -29,5 +29,5 @@ class Monitor(Process):
                 else:
                     time.sleep(self.config['POLLING_INTERVAL'])
             except Exception:
-                logging.warning('%s 发生错误 %s' % (self.room_info, Exception))
+                logging.warning('%s 发生错误,10秒后重试' % self.room_info)
                 time.sleep(10)

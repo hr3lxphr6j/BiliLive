@@ -7,7 +7,7 @@ import utils as utils
 class Recoder(object):
     def __init__(self, live_urls, room_title):
         self.config = utils.load_config()
-        self.ffmpeg_command = 'ffmpeg -y -loglevel -8 -i "%(live_url)s" -c copy "%(output_file_name)s"'
+        self.ffmpeg_command = 'ffmpeg -re -y -loglevel -8 -i "%(live_url)s" -c copy "%(output_file_name)s"'
         self.ffmpeg_opts = {
             'live_url': live_urls[self.config['URL_SELECT']],
             'output_file_name': '%s%s %s.%s' % (
