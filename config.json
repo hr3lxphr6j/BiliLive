@@ -1,10 +1,10 @@
 {
-  "ROOM_IDS": [
-    1029
+  "ROOM_URLS": [
+    "https://live.bilibili.com/1030",
+    "https://www.panda.tv/6666"
   ],
   "POLLING_INTERVAL": 30,
   "LAZY_TIME": 5,
   "OUTPUT_FILE_EXT": "flv",
-  "OUTPUT_DIR": "/Users/chigusa/",
-  "URL_SELECT": 0
+  "OUTPUT_DIR": "/Users/chigusa"
 }
