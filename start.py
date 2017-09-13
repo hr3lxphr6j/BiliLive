@@ -16,6 +16,7 @@ def start():
         pool.join()
     except KeyboardInterrupt:
         logger.warning('用户中断')
+        exit(1)
 
 
 if __name__ == '__main__':
