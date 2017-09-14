@@ -5,6 +5,7 @@
 ![image](https://github.com/hr3lxphr6j/BiliLive/raw/master/screenshot/shot.png)
 
 ## 依赖
+* python3.x(推荐3.6)
 * requests
 * ffmpeg
 
@@ -17,7 +18,7 @@
 
 | 属性 | 说明 |
 | :----: | :----:|
-| ROOM_IDS | 房间ID |
+| ROOM_URLS | 直播间URL |
 | POLLING_INTERVAL | 状态查询间隔 |
 | LAZY_TIME | 状态确认后录制延迟时间 |
 | OUTPUT_FILE_EXT | 输出文件封装方式 |

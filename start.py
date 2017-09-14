@@ -7,7 +7,7 @@ def start():
     config = utils.load_config()
     logger = utils.get_logger()
     logger.info('程序启动')
-    pool = ThreadPool(16)
+    pool = ThreadPool(len(config['ROOM_URLS']))
     for room_url in config['ROOM_URLS']:
         m = Monitor(room_url)
         pool.apply_async(m.run)
