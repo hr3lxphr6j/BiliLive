@@ -1,20 +1,21 @@
 # BiliLive
-垃圾一样的Bilibili直播录制工具   
-目前支持哔哩哔哩，熊猫TV
+直播录制工具   
+目前支持哔哩哔哩，熊猫TV，火猫直播
 
 ![image](https://github.com/hr3lxphr6j/BiliLive/raw/master/screenshot/shot.png)
 
 ## 依赖
 * python3.x(推荐3.6)
-* requests
+* Requests
+* lxml
 * ffmpeg
 
 ## 使用
-`python start.py`
+`python start.py [config.json]`
 
 ## config.json配置说明
 
-目录下的config.json为演示文件，默认会读取`$HOME/.bililive/config.json`
+目录下的config.json为演示文件，如果不指令路径默认会读取`$HOME/.bililive/config.json`
 
 | 属性 | 说明 |
 | :----: | :----:|

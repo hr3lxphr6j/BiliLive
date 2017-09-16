@@ -13,13 +13,15 @@ def cut_video(input_file):
     part = hour if minute < 10 else hour + 1
     for i in range(0, part):
         part_index = i + 1
-        ffmpeg_command = 'ffmpeg -ss %(start)d:00:00 -i "%(input)s" -c copy %(end)s "%(out)s"'
+        ffmpeg_command = 'ffmpeg %(start)s %(end)s -i "%(input)s" -c copy "%(out)s"'
+        start = ('-ss %d:00:00' % i) if i != 0 else ''
         ffmpeg_opts = {
-            'start': i,
+            'start': start,
             'input': input_file,
             'end': '' if part == hour and i == part - 1 else '-t 1:00:00',
             'out': os.path.splitext(input_file)[0] + '_part' + str(part_index) + '.mp4'
         }
+        # print(ffmpeg_command % ffmpeg_opts)
         os.system(ffmpeg_command % ffmpeg_opts)
         pass
 

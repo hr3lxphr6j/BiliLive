@@ -9,7 +9,7 @@ __logger = None
 mutex = Lock()
 
 
-def load_config(file=os.path.join(os.environ['HOME'], '.bililive', 'config.json')):
+def load_config(file=os.path.join(os.path.expanduser('~'), '.bililive', 'config.json')):
     """
     加载配置
     :param file: 配置文件路径，默认位置为 $HOME/.bililive/config.json
@@ -33,13 +33,6 @@ def load_config(file=os.path.join(os.environ['HOME'], '.bililive', 'config.json'
             if not os.path.isdir(__config['OUTPUT_DIR']):
                 logging.warning('输出文件路径不合法')
                 exit(1)
-            # log文件不存在则创建
-            if not os.path.isfile(os.path.join(__config['OUTPUT_DIR'], 'live.log')):
-                try:
-                    os.system('touch ' + os.path.join(__config['OUTPUT_DIR'], 'live.log'))
-                except Exception:
-                    logging.warning('log文件创建失败！')
-                    exit(1)
             # 直播间url简单去重
             __config['ROOM_URLS'] = list(set(__config['ROOM_URLS']))
             mutex.release()

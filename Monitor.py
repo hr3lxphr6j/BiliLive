@@ -26,6 +26,8 @@ class Monitor:
             self.room = BiliBiliLive(self.room_id)
         elif self.site_domain == 'www.panda.tv':
             self.room = PandaTVLive(self.room_id)
+        elif self.site_domain == 'www.huomao.com':
+            self.room = HuoMaoLive(self.room_id)
 
     def run(self):
         logging_title = '[平台:%s 直播间:%s 主播:%s]' % (
@@ -40,7 +42,8 @@ class Monitor:
                     t = Recoder(self.room.get_live_urls()[0], self.config['OUTPUT_DIR'],
                                 '%s %s.%s' % (utils.get_current_time(), self.room.get_room_info()['roomname'],
                                               self.config['OUTPUT_FILE_EXT'])).start_recoding()
-                    self.logger.info('%s 录制结束!录制时长:%s秒' % (logging_title, str(round(t))))
+                    if t > 30:
+                        self.logger.info('%s 录制结束!录制时长:%s秒' % (logging_title, str(round(t))))
                 else:
                     time.sleep(self.config['POLLING_INTERVAL'])
             except Exception:
