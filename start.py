@@ -6,9 +6,9 @@ import sys
 
 def start():
     if len(sys.argv[1:]) == 0:
-        config = utils.load_config(sys.argv[1])
-    else:
         config = utils.load_config()
+    else:
+        config = utils.load_config(sys.argv[1])
     logger = utils.get_logger()
     logger.info('程序启动')
     room_count = len(config['ROOM_URLS'])
