@@ -26,8 +26,19 @@ def cut_video(input_file):
         pass
 
 
+def flv2mp4(input_file):
+    ffmpeg_command = 'ffmpeg -i %s -c copy %s'
+    os.system(ffmpeg_command % (input_file, os.path.splitext(input_file)[0] + '.mp4'))
+
+
 if __name__ == '__main__':
     if len(sys.argv[1:]) == 0:
         print("请至少输入一个文件")
     for file in sys.argv[1:]:
-        cut_video(file)
+        if os.path.splitext(file)[1] == '.flv':
+            temp = os.path.splitext(file)[0] + '.mp4'
+            flv2mp4(file)
+            cut_video(temp)
+            os.remove(temp)
+        else:
+            cut_video(file)
