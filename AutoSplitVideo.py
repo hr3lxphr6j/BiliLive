@@ -27,7 +27,7 @@ def cut_video(input_file):
 
 
 def flv2mp4(input_file):
-    ffmpeg_command = 'ffmpeg -i %s -c copy %s'
+    ffmpeg_command = 'ffmpeg -i "%s" -c copy "%s"'
     os.system(ffmpeg_command % (input_file, os.path.splitext(input_file)[0] + '.mp4'))
 
 
