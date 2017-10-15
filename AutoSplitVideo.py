@@ -10,7 +10,7 @@ def cut_video(input_file):
     video_duration = video.tracks[0].duration
     hour = int(video_duration / 1000 / 60 // 60)
     minute = int(video_duration / 1000 / 60 % 60)
-    part = hour if minute < 10 else hour + 1
+    part = hour if minute < 20 else hour + 1
     for i in range(0, part):
         part_index = i + 1
         ffmpeg_command = 'ffmpeg %(start)s %(end)s -i "%(input)s" -c copy "%(out)s"'
