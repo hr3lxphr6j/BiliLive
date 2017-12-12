@@ -35,3 +35,43 @@
 * ffmpeg
 ## 使用
 `python AutoSplitVideo.py <input>`
+
+# DLC2 SplitVideo
+AutoSplitVideo的替代品,可根据yml配置分段视频
+## 依赖
+* ffmpeg
+* ffprobe
+## 使用
+`python SplitVideo.py <input.yml>`
+## Demo.yml
+```yaml
+GlobalConfig:
+  # 是否限制Part长度
+  LimitPartLength: true
+  # 每段视频最大长度
+  PartTime: '1:00:00'
+  # 视频长度对PartTime取余数(最后1Part长度)，如果时长不超过PartTime * GreedyPercentage则不独立分段
+  GreedyPercentage: 0.15
+  # 是否先重封装为Mp4，提供索引加快分段速度
+  RemuxToMp4: false
+  # 并行处理数量
+  ProcessThread: 4
+Projects:
+    # 文件所在路径
+  - Path: '/Users/chigusa/Movies'
+    # 视频文件
+    Files:
+      - 2017-12-06 18-39-48 【王老菊】开启鸡眼模式.flv
+    Parts:
+      # 最后的数字代表以哪段文件为准，从0开始计算，-1代表总时长
+      # EndTime中使用00:00:00代表到结尾
+      - Name: 吃鸡
+        StartTime: ['00:00:00',-1]
+        EndTime: ['04:05:20',-1]
+      - Name: 彩虹六号
+        StartTime: ['04:05:20',-1]
+        EndTime: ['05:13:40',-1]
+      - Name: Slay the Spire
+        StartTime: ['05:13:40',-1]
+        EndTime: ['00:00:00',-1]
+```
