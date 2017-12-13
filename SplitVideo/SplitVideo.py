@@ -245,7 +245,7 @@ def main():
         for part in storyboard:
             pool.apply_async(cut_video, (
                 remux_file_name if config['GlobalConfig']['RemuxToMp4'] else file_list_to_byte(path, file_list),
-                os.path.join(path, part['name'] + '.mp4'),
+                os.path.join(path, '%02d.%s.mp4' % (storyboard.index(part) + 1, part['name'])),
                 str(part['start']),
                 str(part['end']),
                 not config['GlobalConfig']['RemuxToMp4']
