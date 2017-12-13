@@ -32,9 +32,10 @@ def file_list_to_byte(path, file_list):
 
 def get_sha1_hex(filename):
     sha1_obj = sha1()
-    with open(filename, 'rb') as f:
-        for l in f:
-            sha1_obj.update(l)
+    sha1_obj.update(filename.encode())
+    # with open(filename, 'rb') as f:
+    #     for l in f:
+    #         sha1_obj.update(l)
     return sha1_obj.digest()
 
 
@@ -75,7 +76,7 @@ def merge_video_to_file(path, file_list):
          '-c', 'copy',
          remux_file_name],
         stdin=subprocess.PIPE,
-        stderr=subprocess.STDOUT)
+        stderr=subprocess.PIPE)
     child.communicate(file_list_to_byte(path, file_list))
     crc = get_crc32(remux_file_name)
     res_file_name = os.path.join(path, md5_name + ('[%x]' % crc) + '.mp4')
@@ -149,13 +150,13 @@ def get_abs_time(time, part, time_line, is_end=False):
         if part == -1:
             return time
         else:
-            return time + time_line[part]
+            return min(time + time_line[part], time_line[part + 1])
 
 
 def limit_part_length(storyboard, part_time, greedy_percentage):
     new_storyboard = []
     for part in storyboard:
-        if part['duration'] >= part_time:
+        if part['duration'] >= part_time * (1 + greedy_percentage):
             duration = part['duration']
             new_part = []
             for i in range(int(math.ceil(part['duration'] / part_time))):
@@ -171,6 +172,7 @@ def limit_part_length(storyboard, part_time, greedy_percentage):
                 })
             if new_part[-1]['duration'] <= part_time * greedy_percentage:
                 new_part[-2]['end'] += new_part[-1]['duration']
+                new_part[-2]['duration'] += new_part[-1]['duration']
                 new_part.pop()
             new_storyboard.extend(new_part)
         else:
@@ -217,6 +219,9 @@ def main():
         for part in parts:
             start = get_abs_time(str2time(part['StartTime'][0]), part['StartTime'][1], time_line)
             end = get_abs_time(str2time(part['EndTime'][0]), part['EndTime'][1], time_line, True)
+            if end - start <= datetime.timedelta():
+                logging.error('Part No: %d Was Wrong, Skipped!')
+                continue
             storyboard.append({
                 'name': part['Name'],
                 'start': start,
