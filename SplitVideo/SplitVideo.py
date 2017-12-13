@@ -156,7 +156,7 @@ def get_abs_time(time, part, time_line, is_end=False):
 def limit_part_length(storyboard, part_time, greedy_percentage):
     new_storyboard = []
     for part in storyboard:
-        if part['duration'] >= part_time * (1 + greedy_percentage):
+        if part['duration'] >= (part_time * (1 + greedy_percentage)):
             duration = part['duration']
             new_part = []
             for i in range(int(math.ceil(part['duration'] / part_time))):
