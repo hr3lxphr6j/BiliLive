@@ -1,6 +1,4 @@
 from .BaseLive import BaseLive
-import re
-from lxml import etree
 
 
 class HuoMaoLive(BaseLive):
@@ -12,8 +10,13 @@ class HuoMaoLive(BaseLive):
 
     def get_room_info(self):
         dom = self.common_request('GET', 'https://' + self.site_domain + '/' + str(self.room_id)).text
-        tree = etree.HTML(dom)
-        video_id = re.findall('"stream":"(\w*)"', dom)[0]
+        room_info = None
+        for l in dom.split('\n'):
+            if 'channelOneInfo' in l:
+                room_info = eval(l[l.index('{'):-2].replace('\/', '/').replace('null', '""'))
+        room_name = room_info['channel']
+        host_name = room_info['nickname']
+        video_id = room_info['stream']
         url = 'https://www.huomao.com/swf/live_data'
         data = self.common_request('POST', url, data={
             'VideoIDS': video_id,
@@ -21,8 +24,6 @@ class HuoMaoLive(BaseLive):
             'cdns': 1
         }).json()
         status = (data['roomStatus'] == '1')
-        room_name = tree.cssselect('.title-name title-name h1')[0].text
-        host_name = tree.cssselect('.title-box p span')[0].text.strip()
         return {
             'hostname': host_name,
             'roomname': room_name,
@@ -33,7 +34,11 @@ class HuoMaoLive(BaseLive):
 
     def get_live_urls(self):
         dom = self.common_request('GET', 'https://' + self.site_domain + '/' + str(self.room_id)).text
-        video_id = re.findall('"stream":"(\w*)"', dom)[0]
+        room_info = None
+        for l in dom.split('\n'):
+            if 'channelOneInfo' in l:
+                room_info = eval(l[l.index('{'):-2].replace('\/', '/').replace('null', '""'))
+        video_id = room_info['stream']
         url = 'https://www.huomao.com/swf/live_data'
         data = self.common_request('POST', url, data={
             'VideoIDS': video_id,
