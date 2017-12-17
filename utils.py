@@ -24,7 +24,7 @@ def load_config(file=os.path.join(os.path.expanduser('~'), '.bililive', 'config.
             mutex.release()
         else:
             try:
-                with open(file, 'r') as config:
+                with open(file, 'r', encoding='utf8') as config:
                     __config = json.load(config)
             except Exception:
                 logging.error('配置文件加载错误！')

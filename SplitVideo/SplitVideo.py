@@ -185,7 +185,6 @@ def cut_video(input_file: str, output_file: str, start_time: str, end_time: str,
         child = subprocess.Popen(
             ['ffmpeg',
              '-y',
-             '-hide_banner', '-nostats',
              '-protocol_whitelist', 'file,pipe',
              '-safe', '0',
              '-f', 'concat',
@@ -201,7 +200,6 @@ def cut_video(input_file: str, output_file: str, start_time: str, end_time: str,
         child = subprocess.Popen(
             ['ffmpeg',
              '-y',
-             '-hide_banner', '-nostats',
              '-i', input_file,
              '-ss', start_time,
              '-to', end_time,
@@ -211,6 +209,105 @@ def cut_video(input_file: str, output_file: str, start_time: str, end_time: str,
             stderr=subprocess.PIPE
         )
         child.communicate()
+
+
+@log
+def cut_video_and_rip(input_file: str, output_file: str, start_time: str, end_time: str, is_concat: bool = True):
+    """
+    分割并压制视频
+    :param input_file: 输入文件
+    :param output_file: 输出文件
+    :param start_time: 起始时间
+    :param end_time: 结束时间
+    :param is_concat: 输入是否为Virtual Concatenation Script
+    :return:
+    """
+    log_file_prefix = md5(output_file.encode()).hexdigest()
+    if is_concat:
+        pass1 = subprocess.Popen([
+            'ffmpeg',
+            '-y',
+            '-protocol_whitelist', 'file,pipe',
+            '-safe', '0',
+            '-f', 'concat',
+            '-i', '-',
+            '-max_muxing_queue_size', '2048',
+            '-ss', start_time,
+            '-to', end_time,
+            '-c:v', 'libx264',
+            '-pass', '1',
+            '-passlogfile', log_file_prefix,
+            '-b:v', '1750k',
+            '-an',
+            '-f', 'mp4',
+            '-'
+        ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.STDOUT)
+        pass1.communicate(input_file)
+        pass2 = subprocess.Popen([
+            'ffmpeg',
+            '-y',
+            '-protocol_whitelist', 'file,pipe',
+            '-safe', '0',
+            '-f', 'concat',
+            '-i', '-',
+            '-max_muxing_queue_size', '2048',
+            '-ss', start_time,
+            '-to', end_time,
+            '-c:v', 'libx264',
+            '-pass', '1',
+            '-passlogfile', log_file_prefix,
+            '-b:v', '1750k',
+            '-c:a', 'aac',
+            '-b:a', '128k',
+            output_file
+        ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.STDOUT)
+        pass2.communicate()
+    else:
+        pass1 = subprocess.Popen([
+            'ffmpeg',
+            '-y',
+            '-i', input_file,
+            '-max_muxing_queue_size', '2048',
+            '-ss', start_time,
+            '-to', end_time,
+            '-c:v', 'libx264',
+            '-pass', '2',
+            '-passlogfile', log_file_prefix,
+            '-b:v', '1750k',
+            '-an',
+            '-f', 'mp4',
+            '-'
+        ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.STDOUT)
+        pass1.communicate()
+        pass2 = subprocess.Popen([
+            'ffmpeg',
+            '-y',
+            '-protocol_whitelist', 'file,pipe',
+            '-safe', '0',
+            '-f', 'concat',
+            '-i', '-',
+            '-max_muxing_queue_size', '2048',
+            '-ss', start_time,
+            '-to', end_time,
+            '-c:v', 'libx264',
+            '-pass', '1',
+            '-passlogfile', log_file_prefix,
+            '-b:v', '1750k',
+            '-c:a', 'aac',
+            '-b:a', '128k',
+            output_file
+        ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.STDOUT)
+        pass2.communicate()
+
+    pass
 
 
 def get_abs_time(time: datetime.timedelta, part: int, time_line: list, is_end: bool = False) -> datetime.timedelta:
@@ -362,7 +459,12 @@ def main():
             logging.error('No Part Info Defined!')
             exit(1)
         for part in parts:
-            start = get_abs_time(str2time(part['StartTime'][0]), part['StartTime'][1], time_line)
+            if part.get('StartTime'):
+                start = get_abs_time(str2time(part['StartTime'][0]), part['StartTime'][1], time_line)
+            elif len(storyboard) > 0:
+                start = storyboard[-1]['end']
+            else:
+                start = datetime.timedelta()
             end = get_abs_time(str2time(part['EndTime'][0]), part['EndTime'][1], time_line, True)
             if end - start <= datetime.timedelta():
                 logging.error('Part No: %d Was Wrong, Skipped!')

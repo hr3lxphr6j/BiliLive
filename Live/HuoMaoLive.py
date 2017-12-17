@@ -13,15 +13,15 @@ class HuoMaoLive(BaseLive):
     def get_room_info(self):
         dom = self.common_request('GET', 'https://' + self.site_domain + '/' + str(self.room_id)).text
         tree = etree.HTML(dom)
-        video_id = re.findall('getFlash\("\d*","(\w*)","\d*"\)', dom)[0]
+        video_id = re.findall('"stream":"(\w*)"', dom)[0]
         url = 'https://www.huomao.com/swf/live_data'
         data = self.common_request('POST', url, data={
             'VideoIDS': video_id,
             'streamtype': 'live',
             'cdns': 1
         }).json()
-        status = True if data['roomStatus'] == '1' else False
-        room_name = tree.cssselect('.title-name h1')[0].text
+        status = (data['roomStatus'] == '1')
+        room_name = tree.cssselect('.title-name title-name h1')[0].text
         host_name = tree.cssselect('.title-box p span')[0].text.strip()
         return {
             'hostname': host_name,
@@ -33,8 +33,7 @@ class HuoMaoLive(BaseLive):
 
     def get_live_urls(self):
         dom = self.common_request('GET', 'https://' + self.site_domain + '/' + str(self.room_id)).text
-        tree = etree.HTML(dom)
-        video_id = re.findall('getFlash\("\d*","(\w*)","\d*"\)', dom)[0]
+        video_id = re.findall('"stream":"(\w*)"', dom)[0]
         url = 'https://www.huomao.com/swf/live_data'
         data = self.common_request('POST', url, data={
             'VideoIDS': video_id,

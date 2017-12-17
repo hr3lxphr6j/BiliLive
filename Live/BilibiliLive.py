@@ -17,7 +17,7 @@ class BiliBiliLive(BaseLive):
             data['roomname'] = response['data']['title']
             data['site_name'] = self.site_name
             data['site_domain'] = self.site_domain
-            data['status'] = True if response['data']['live_status'] == 1 else False
+            data['status'] = response['data']['live_status'] == 1
         response = self.common_request('GET', user_info_url, {'roomid': self.room_id}).json()
         data['hostname'] = response['data']['info']['uname']
         return data

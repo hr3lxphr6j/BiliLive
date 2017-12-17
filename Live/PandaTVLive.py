@@ -23,7 +23,7 @@ class PandaTVLive(BaseLive):
                 'roomname': data['data']['roominfo']['name'],
                 'site_name': self.site_name,
                 'site_domain': self.site_domain,
-                'status': True if data['data']['videoinfo']['status'] == '2' else False
+                'status': data['data']['videoinfo']['status'] == '2'
             }
 
     def get_live_urls(self):

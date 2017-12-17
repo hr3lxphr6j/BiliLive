@@ -17,7 +17,7 @@ class Monitor:
         # 域名
         self.site_domain = urlparse(self.room_url)[1]
         # 房间号
-        self.room_id = int(urlparse(self.room_url)[2].replace('/', ''))
+        self.room_id = urlparse(self.room_url)[2].replace('/', '')
         # 配置文件
         self.config = utils.load_config()
         # Logger
@@ -28,6 +28,8 @@ class Monitor:
             self.room = PandaTVLive(self.room_id)
         elif self.site_domain == 'www.huomao.com':
             self.room = HuoMaoLive(self.room_id)
+        elif self.site_domain == 'www.zhanqi.tv':
+            self.room = ZhanqiLive(self.room_id)
 
     def run(self):
         logging_title = '[平台:%s 直播间:%s 主播:%s]' % (

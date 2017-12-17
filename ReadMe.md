@@ -1,6 +1,6 @@
 # BiliLive
 直播录制工具   
-目前支持哔哩哔哩，熊猫TV，火猫直播
+目前支持哔哩哔哩，熊猫TV，火猫直播，战旗TV
 
 ![image](https://github.com/hr3lxphr6j/BiliLive/raw/master/screenshot/shot.png)
 
