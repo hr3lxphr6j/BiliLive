@@ -191,7 +191,9 @@ def cut_video(input_file: str, output_file: str, start_time: str, end_time: str,
              '-i', '-',
              '-ss', start_time,
              '-to', end_time,
-             '-c', 'copy',
+             '-c:v', 'copy',
+             '-c:a', 'aac',
+             '-b:a', '128k',
              output_file],
             stdin=subprocess.PIPE,
             stderr=subprocess.PIPE)
@@ -203,7 +205,9 @@ def cut_video(input_file: str, output_file: str, start_time: str, end_time: str,
              '-i', input_file,
              '-ss', start_time,
              '-to', end_time,
-             '-c', 'copy',
+             '-c:v', 'copy',
+             '-c:a', 'aac',
+             '-b:a', '128k',
              output_file],
             stdin=subprocess.PIPE,
             stderr=subprocess.PIPE
@@ -223,6 +227,11 @@ def cut_video_and_rip(input_file: str, output_file: str, start_time: str, end_ti
     :return:
     """
     log_file_prefix = md5(output_file.encode()).hexdigest()
+    file_path = os.path.split(output_file)[1]
+    video_bit_rate = '1750k'
+    audio_bit_rate = '128k'
+    x264_params = 'b-adapt=2:me=umh:rc-lookahead=60:subme=8:ref=6:direct=auto:min-keyint=1'
+
     if is_concat:
         pass1 = subprocess.Popen([
             'ffmpeg',
@@ -236,36 +245,38 @@ def cut_video_and_rip(input_file: str, output_file: str, start_time: str, end_ti
             '-to', end_time,
             '-c:v', 'libx264',
             '-pass', '1',
-            '-passlogfile', log_file_prefix,
-            '-b:v', '1750k',
-            '-an',
-            '-f', 'mp4',
-            '-'
-        ],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.STDOUT)
-        pass1.communicate(input_file)
-        pass2 = subprocess.Popen([
-            'ffmpeg',
-            '-y',
-            '-protocol_whitelist', 'file,pipe',
-            '-safe', '0',
-            '-f', 'concat',
-            '-i', '-',
-            '-max_muxing_queue_size', '2048',
-            '-ss', start_time,
-            '-to', end_time,
-            '-c:v', 'libx264',
-            '-pass', '1',
-            '-passlogfile', log_file_prefix,
-            '-b:v', '1750k',
+            '-passlogfile', os.path.join(file_path, log_file_prefix),
+            '-x264-params', x264_params,
+            '-b:v', video_bit_rate,
             '-c:a', 'aac',
-            '-b:a', '128k',
-            output_file
+            '-f', 'mp4',
+            '/dev/null'
         ],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.STDOUT)
-        pass2.communicate()
+            stdin=subprocess.PIPE,
+            stdout=subprocess.DEVNULL)
+        pass1.communicate(input_file)
+        # pass2 = subprocess.Popen([
+        #     'ffmpeg',
+        #     '-y',
+        #     '-protocol_whitelist', 'file,pipe',
+        #     '-safe', '0',
+        #     '-f', 'concat',
+        #     '-i', '-',
+        #     '-max_muxing_queue_size', '2048',
+        #     '-ss', start_time,
+        #     '-to', end_time,
+        #     '-c:v', 'libx264',
+        #     '-pass', '2',
+        #     '-passlogfile', log_file_prefix,
+        #     '-x264-params', x264_params,
+        #     '-b:v', video_bit_rate,
+        #     '-c:a', 'aac',
+        #     '-b:a', audio_bit_rate,
+        #     output_file
+        # ],
+        #     stdin=subprocess.PIPE,
+        #     stdout=subprocess.DEVNULL)
+        # pass2.communicate(input_file)
     else:
         pass1 = subprocess.Popen([
             'ffmpeg',
@@ -275,9 +286,10 @@ def cut_video_and_rip(input_file: str, output_file: str, start_time: str, end_ti
             '-ss', start_time,
             '-to', end_time,
             '-c:v', 'libx264',
-            '-pass', '2',
+            '-pass', '1',
             '-passlogfile', log_file_prefix,
-            '-b:v', '1750k',
+            '-x264-params', x264_params,
+            '-b:v', video_bit_rate,
             '-an',
             '-f', 'mp4',
             '-'
@@ -288,26 +300,22 @@ def cut_video_and_rip(input_file: str, output_file: str, start_time: str, end_ti
         pass2 = subprocess.Popen([
             'ffmpeg',
             '-y',
-            '-protocol_whitelist', 'file,pipe',
-            '-safe', '0',
-            '-f', 'concat',
-            '-i', '-',
+            '-i', input_file,
             '-max_muxing_queue_size', '2048',
             '-ss', start_time,
             '-to', end_time,
             '-c:v', 'libx264',
-            '-pass', '1',
+            '-pass', '2',
             '-passlogfile', log_file_prefix,
-            '-b:v', '1750k',
+            '-x264-params', x264_params,
+            '-b:v', video_bit_rate,
             '-c:a', 'aac',
-            '-b:a', '128k',
+            '-b:a', audio_bit_rate,
             output_file
         ],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.STDOUT)
         pass2.communicate()
-
-    pass
 
 
 def get_abs_time(time: datetime.timedelta, part: int, time_line: list, is_end: bool = False) -> datetime.timedelta:
@@ -426,6 +434,8 @@ def main():
         # 分段集合
         parts = project['Parts']
 
+        rip = project['Rip']
+
         # 记录每个视频文件在总长度的起始位置，末尾为总视频长度
         time_line = [datetime.timedelta()]
         for file in file_list:
@@ -495,7 +505,7 @@ def main():
 
         # 向线程池中异步提交任务
         for part in storyboard:
-            pool.apply_async(cut_video, (
+            pool.apply_async(cut_video_and_rip if rip else cut_video, (
                 remux_file_name if is_remux else file_list_to_byte(path, file_list),
                 os.path.join(path, '%02d.%s.mp4' % (storyboard.index(part) + 1, part['name'])),
                 str(part['start']),
