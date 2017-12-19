@@ -5,6 +5,7 @@ import json
 import math
 import yaml
 import logging
+import platform
 import datetime
 import functools
 import subprocess
@@ -161,11 +162,11 @@ def get_video_duration(filename: str) -> datetime.timedelta:
 def log(func):
     @functools.wraps(func)
     def wrapper(*args, **kw):
-        logging.info('Splitting Video To\t%s' % args[1] or kw['output_file'])
+        logging.info('Splitting Video To\t%s' % args[1] or kw.get('output_file'))
         t = datetime.datetime.now()
         func(*args, **kw)
         logging.info(
-            'Split To\t%s\tTime Spent\t%s' % (args[1] or kw['output_file'], str(datetime.datetime.now() - t)))
+            'Split To\t%s\tTime Spent\t%s' % (args[1] or kw.get('output_file'), str(datetime.datetime.now() - t)))
 
     return wrapper
 
@@ -181,38 +182,20 @@ def cut_video(input_file: str, output_file: str, start_time: str, end_time: str,
     :param is_concat: 输入是否为Virtual Concatenation Script
     :return:
     """
+    ffmpeg_command = ['ffmpeg', '-y']
     if is_concat:
-        child = subprocess.Popen(
-            ['ffmpeg',
-             '-y',
-             '-protocol_whitelist', 'file,pipe',
-             '-safe', '0',
-             '-f', 'concat',
-             '-i', '-',
-             '-ss', start_time,
-             '-to', end_time,
-             '-c:v', 'copy',
-             '-c:a', 'aac',
-             '-b:a', '128k',
-             output_file],
-            stdin=subprocess.PIPE,
-            stderr=subprocess.PIPE)
-        child.communicate(input_file)
+        ffmpeg_command.extend(['-protocol_whitelist', 'file,pipe',
+                               '-safe', '0',
+                               '-f', 'concat',
+                               '-i', '-'])
     else:
-        child = subprocess.Popen(
-            ['ffmpeg',
-             '-y',
-             '-i', input_file,
-             '-ss', start_time,
-             '-to', end_time,
-             '-c:v', 'copy',
-             '-c:a', 'aac',
-             '-b:a', '128k',
-             output_file],
-            stdin=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-        child.communicate()
+        ffmpeg_command.extend(['-i', input_file])
+    ffmpeg_command.extend(['-ss', start_time,
+                           '-to', end_time,
+                           '-c', 'copy',
+                           output_file])
+    child = subprocess.Popen(ffmpeg_command, stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    child.communicate(input_file if is_concat else None)
 
 
 @log
@@ -226,96 +209,50 @@ def cut_video_and_rip(input_file: str, output_file: str, start_time: str, end_ti
     :param is_concat: 输入是否为Virtual Concatenation Script
     :return:
     """
+    if os.path.isfile(output_file):
+        return
     log_file_prefix = md5(output_file.encode()).hexdigest()
-    file_path = os.path.split(output_file)[1]
+    file_path, file_name = os.path.split(output_file)
+    null = 'NUL' if platform.system() == 'Windows' else '/dev/null'
     video_bit_rate = '1750k'
     audio_bit_rate = '128k'
-    x264_params = 'b-adapt=2:me=umh:rc-lookahead=60:subme=8:ref=6:direct=auto:min-keyint=1'
+    x264_params = 'b-adapt=2:me=umh:rc-lookahead=60:subme=8:ref=5:direct=auto:min-keyint=1'
 
-    if is_concat:
-        pass1 = subprocess.Popen([
-            'ffmpeg',
-            '-y',
-            '-protocol_whitelist', 'file,pipe',
-            '-safe', '0',
-            '-f', 'concat',
-            '-i', '-',
+    os.chdir(file_path)
+    for i in range(1, 3):
+        ffmpeg_command = ['ffmpeg', '-y']
+        if is_concat:
+            ffmpeg_command.extend([
+                '-protocol_whitelist', 'file,pipe',
+                '-safe', '0',
+                '-f', 'concat',
+                '-i', '-'])
+        else:
+            ffmpeg_command.extend(['-i', input_file])
+        ffmpeg_command.extend([
             '-max_muxing_queue_size', '2048',
             '-ss', start_time,
             '-to', end_time,
             '-c:v', 'libx264',
-            '-pass', '1',
-            '-passlogfile', os.path.join(file_path, log_file_prefix),
-            '-x264-params', x264_params,
-            '-b:v', video_bit_rate,
-            '-c:a', 'aac',
-            '-f', 'mp4',
-            '/dev/null'
-        ],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.DEVNULL)
-        pass1.communicate(input_file)
-        # pass2 = subprocess.Popen([
-        #     'ffmpeg',
-        #     '-y',
-        #     '-protocol_whitelist', 'file,pipe',
-        #     '-safe', '0',
-        #     '-f', 'concat',
-        #     '-i', '-',
-        #     '-max_muxing_queue_size', '2048',
-        #     '-ss', start_time,
-        #     '-to', end_time,
-        #     '-c:v', 'libx264',
-        #     '-pass', '2',
-        #     '-passlogfile', log_file_prefix,
-        #     '-x264-params', x264_params,
-        #     '-b:v', video_bit_rate,
-        #     '-c:a', 'aac',
-        #     '-b:a', audio_bit_rate,
-        #     output_file
-        # ],
-        #     stdin=subprocess.PIPE,
-        #     stdout=subprocess.DEVNULL)
-        # pass2.communicate(input_file)
-    else:
-        pass1 = subprocess.Popen([
-            'ffmpeg',
-            '-y',
-            '-i', input_file,
-            '-max_muxing_queue_size', '2048',
-            '-ss', start_time,
-            '-to', end_time,
-            '-c:v', 'libx264',
-            '-pass', '1',
+            '-pass', str(i),
             '-passlogfile', log_file_prefix,
-            '-x264-params', x264_params,
             '-b:v', video_bit_rate,
-            '-an',
-            '-f', 'mp4',
-            '-'
-        ],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.STDOUT)
-        pass1.communicate()
-        pass2 = subprocess.Popen([
-            'ffmpeg',
-            '-y',
-            '-i', input_file,
-            '-max_muxing_queue_size', '2048',
-            '-ss', start_time,
-            '-to', end_time,
-            '-c:v', 'libx264',
-            '-pass', '2',
-            '-passlogfile', log_file_prefix,
             '-x264-params', x264_params,
-            '-b:v', video_bit_rate,
-            '-c:a', 'aac',
-            '-b:a', audio_bit_rate,
-            output_file
-        ],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.STDOUT)
-        pass2.communicate()
+        ])
+        if i == 1:
+            ffmpeg_command.extend(['-an', '-f', 'mp4', null])
+        else:
+            ffmpeg_command.extend([
+                '-c:a', 'aac',
+                '-b:a', audio_bit_rate,
+                output_file
+            ])
+        child = subprocess.Popen(ffmpeg_command, stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        child.communicate(input_file if is_concat else None)
+    for root, _, files in os.walk(file_path):
+        for file in files:
+            if log_file_prefix in file:
+                os.remove(os.path.join(root, file))
 
 
 def get_abs_time(time: datetime.timedelta, part: int, time_line: list, is_end: bool = False) -> datetime.timedelta:
@@ -433,8 +370,8 @@ def main():
         file_list = project['Files']
         # 分段集合
         parts = project['Parts']
-
-        rip = project['Rip']
+        # 是否重编码
+        rip = project.get('Rip', False)
 
         # 记录每个视频文件在总长度的起始位置，末尾为总视频长度
         time_line = [datetime.timedelta()]
