@@ -7,7 +7,6 @@
 ## 依赖
 * python3.x(推荐3.6)
 * Requests
-* lxml
 * ffmpeg
 
 ## 使用
@@ -15,7 +14,7 @@
 
 ## config.json配置说明
 
-目录下的config.json为演示文件，如果不指令路径默认会读取`$HOME/.bililive/config.json`
+目录下的config.json为演示文件，如果不指定路径默认会读取`$HOME/.bililive/config.json`
 
 | 属性 | 说明 |
 | :----: | :----:|
