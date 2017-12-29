@@ -27,11 +27,11 @@ def load_config(file=os.path.join(os.path.expanduser('~'), '.bililive', 'config.
                 with open(file, 'r', encoding='utf8') as config:
                     __config = json.load(config)
             except Exception:
-                logging.error('配置文件加载错误！')
+                logging.error('Config file error!')
                 exit(1)
             # 判定输出路径是否为目录且是否存在
             if not os.path.isdir(__config['OUTPUT_DIR']):
-                logging.warning('输出文件路径不合法')
+                logging.warning('Path Not Found!')
                 exit(1)
             # 直播间url简单去重
             __config['ROOM_URLS'] = list(set(__config['ROOM_URLS']))

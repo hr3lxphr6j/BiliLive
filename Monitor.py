@@ -32,20 +32,20 @@ class Monitor:
             self.room = ZhanqiLive(self.room_id)
 
     def run(self):
-        logging_title = '[平台:%s 直播间:%s 主播:%s]' % (
+        logging_title = '[Platform:%s Room:%s Up:%s]' % (
             self.site_domain, self.room_id, self.room.get_room_info()['hostname'])
-        self.logger.info('%s 开始监控' % logging_title)
+        self.logger.info('%s Start Monitoring' % logging_title)
         while 1:
             try:
                 if self.room.get_room_info()['status']:
-                    self.logger.info('%s 准备录制' % logging_title)
+                    self.logger.info('%s Begin Recoding' % logging_title)
                     time.sleep(self.config['LAZY_TIME'])
-                    self.logger.info('%s 开始录制' % logging_title)
+                    self.logger.info('%s Start Recoding' % logging_title)
                     t = Recoder(self.room.get_live_urls()[0], self.config['OUTPUT_DIR'],
                                 '%s %s.%s' % (utils.get_current_time(), self.room.get_room_info()['roomname'],
                                               self.config['OUTPUT_FILE_EXT'])).start_recoding()
                     if t > 30:
-                        self.logger.info('%s 录制结束!录制时长:%s秒' % (logging_title, str(round(t))))
+                        self.logger.info('%s Recoded Over!\tTime:%s s' % (logging_title, str(round(t))))
                 else:
                     time.sleep(self.config['POLLING_INTERVAL'])
             except Exception:

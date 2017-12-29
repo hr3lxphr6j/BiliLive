@@ -10,10 +10,10 @@ def start():
     else:
         config = utils.load_config(sys.argv[1])
     logger = utils.get_logger()
-    logger.info('程序启动')
+    logger.info('BiliLive Link Start!!!')
     room_count = len(config['ROOM_URLS'])
     if room_count == 0:
-        logger.info('没有发现直播间，程序退出！')
+        logger.info('No Live Room Found，Exit Now!')
         exit(0)
     pool = ThreadPool(room_count)
     for room_url in config['ROOM_URLS']:
@@ -23,7 +23,7 @@ def start():
     try:
         pool.join()
     except KeyboardInterrupt:
-        logger.warning('用户中断')
+        logger.warning('Rua!')
         exit(1)
 
 
