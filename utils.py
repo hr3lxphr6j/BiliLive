@@ -47,7 +47,7 @@ def get_logger():
     else:
         __logger = logging.getLogger()
         __logger.setLevel(logging.INFO)
-        file_handler = logging.FileHandler(os.path.join(__config['OUTPUT_DIR'], 'live.log'), 'a')
+        file_handler = logging.FileHandler(os.path.join(__config['OUTPUT_DIR'], 'live.log'), 'a', encoding='utf8')
         file_handler.setLevel(logging.INFO)
         stream_handler = logging.StreamHandler()
         stream_handler.setLevel(logging.INFO)
