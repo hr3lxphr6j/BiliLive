@@ -118,6 +118,7 @@ def merge_video_to_file(path: str, file_list: list) -> str:
          '-hide_banner', '-nostats',
          '-protocol_whitelist', 'file,pipe',
          '-safe', '0',
+         '-auto_convert', '0',
          '-f', 'concat',
          '-i', '-',
          '-c', 'copy',
@@ -186,6 +187,7 @@ def cut_video(input_file: str, output_file: str, start_time: str, end_time: str,
     if is_concat:
         ffmpeg_command.extend(['-protocol_whitelist', 'file,pipe',
                                '-safe', '0',
+                               '-auto_convert', '0',
                                '-f', 'concat',
                                '-i', '-'])
     else:
@@ -225,6 +227,7 @@ def cut_video_and_rip(input_file: str, output_file: str, start_time: str, end_ti
             ffmpeg_command.extend([
                 '-protocol_whitelist', 'file,pipe',
                 '-safe', '0',
+                '-auto_convert', '0',
                 '-f', 'concat',
                 '-i', '-'])
         else:
